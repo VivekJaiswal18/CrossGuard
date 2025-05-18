@@ -17,6 +17,7 @@ pub mod crossguard {
 
     pub fn create_intent(
         ctx: Context<CreateIntent>,
+        intent_id: u64,
         source_amount: u64,
         target_amount: u64,
         trigger_price: i64,
@@ -29,6 +30,7 @@ pub mod crossguard {
         require!(source_amount > 0, CrossGuardError::InvalidAmount);
         require!(target_amount > 0, CrossGuardError::InvalidAmount);
         require!(trigger_price > 0, CrossGuardError::InvalidPrice);
+        require!(loop_count <= 2, CrossGuardError::LoopCountTooHigh);
 
         // Transfer tokens from user to intent account
         token::transfer(
@@ -45,6 +47,7 @@ pub mod crossguard {
 
         // Initialize intent fields
         let intent = &mut ctx.accounts.intent;
+        intent.intent_id = intent_id;
         intent.user = ctx.accounts.user.key();
         intent.source_token = ctx.accounts.source_token.key();
         intent.target_token = ctx.accounts.target_token.key();
@@ -85,12 +88,16 @@ pub mod crossguard {
     }
 
     pub fn execute_intent(ctx: Context<ExecuteIntent>) -> Result<()> {
-        // Get immutable data first to avoid borrow checker issues
+        // Get all immutable data first to avoid borrow checker issues
         let intent_id = ctx.accounts.intent.key();
         let user = ctx.accounts.intent.user;
         let source_amount = ctx.accounts.intent.source_amount;
         let loop_mode = ctx.accounts.intent.loop_mode;
-        let mut loop_count = ctx.accounts.intent.loop_count;
+        let loop_count = ctx.accounts.intent.loop_count;
+        let intent_user = ctx.accounts.intent.user;
+        let intent_id_val = ctx.accounts.intent.intent_id;
+        let intent_bump = *ctx.bumps.get("intent").unwrap();
+        let intent_seeds = &[b"intent", intent_user.as_ref(), &intent_id_val.to_le_bytes(), &[intent_bump]];
 
         let price_feed = load_price_feed_from_account_info(&ctx.accounts.pyth_price_feed)
             .map_err(|_| CrossGuardError::InvalidPrice)?;
@@ -121,13 +128,14 @@ pub mod crossguard {
             }
             // Transfer to vault
             token::transfer(
-                CpiContext::new(
+                CpiContext::new_with_signer(
                     ctx.accounts.token_program.to_account_info(),
                     Transfer {
                         from: ctx.accounts.intent_token_account.to_account_info(),
                         to: ctx.accounts.vault_token_account.to_account_info(),
                         authority: intent.to_account_info(),
                     },
+                    &[intent_seeds],
                 ),
                 source_amount,
             )?;
@@ -142,13 +150,14 @@ pub mod crossguard {
             intent.executed_at = clock.unix_timestamp;
             // Transfer to user
             token::transfer(
-                CpiContext::new(
+                CpiContext::new_with_signer(
                     ctx.accounts.token_program.to_account_info(),
                     Transfer {
                         from: ctx.accounts.intent_token_account.to_account_info(),
                         to: ctx.accounts.user_token_account.to_account_info(),
                         authority: intent.to_account_info(),
                     },
+                    &[intent_seeds],
                 ),
                 source_amount,
             )?;
@@ -162,11 +171,15 @@ pub mod crossguard {
     }
 
     pub fn cancel_intent(ctx: Context<CancelIntent>) -> Result<()> {
-        // Get immutable data first to avoid borrow checker issues
+        // Get all immutable data first to avoid borrow checker issues
         let intent_id = ctx.accounts.intent.key();
         let user = ctx.accounts.intent.user;
         let source_amount = ctx.accounts.intent.source_amount;
         let loop_mode = ctx.accounts.intent.loop_mode;
+        let intent_user = ctx.accounts.intent.user;
+        let intent_id_val = ctx.accounts.intent.intent_id;
+        let intent_bump = *ctx.bumps.get("intent").unwrap();
+        let intent_seeds = &[b"intent", intent_user.as_ref(), &intent_id_val.to_le_bytes(), &[intent_bump]];
 
         let intent = &mut ctx.accounts.intent;
         require!(intent.is_active, CrossGuardError::IntentNotActive);
@@ -179,13 +192,14 @@ pub mod crossguard {
             let vault_balance = ctx.accounts.vault_token_account.amount;
             if vault_balance > 0 {
                 token::transfer(
-                    CpiContext::new(
+                    CpiContext::new_with_signer(
                         ctx.accounts.token_program.to_account_info(),
                         Transfer {
                             from: ctx.accounts.vault_token_account.to_account_info(),
                             to: ctx.accounts.user_token_account.to_account_info(),
                             authority: intent.to_account_info(),
                         },
+                        &[intent_seeds],
                     ),
                     vault_balance,
                 )?;
@@ -193,13 +207,14 @@ pub mod crossguard {
         } else {
             // Transfer from intent_token_account as before
             token::transfer(
-                CpiContext::new(
+                CpiContext::new_with_signer(
                     ctx.accounts.token_program.to_account_info(),
                     Transfer {
                         from: ctx.accounts.intent_token_account.to_account_info(),
                         to: ctx.accounts.user_token_account.to_account_info(),
                         authority: intent.to_account_info(),
                     },
+                    &[intent_seeds],
                 ),
                 source_amount,
             )?;
@@ -226,12 +241,13 @@ pub struct Initialize<'info> {
 }
 
 #[derive(Accounts)]
+#[instruction(intent_id: u64)]
 pub struct CreateIntent<'info> {
     #[account(
         init,
         payer = user,
         space = 8 + Intent::LEN,
-        seeds = [b"intent", user.key().as_ref()],
+        seeds = [b"intent", user.key().as_ref(), &intent_id.to_le_bytes()],
         bump
     )]
     pub intent: Account<'info, Intent>,
@@ -248,7 +264,7 @@ pub struct CreateIntent<'info> {
         payer = user,
         token::mint = source_token,
         token::authority = intent,
-        seeds = [b"intent_token", user.key().as_ref()],
+        seeds = [b"intent_token", user.key().as_ref(), &intent_id.to_le_bytes()],
         bump
     )]
     pub intent_token_account: Account<'info, TokenAccount>,
@@ -257,7 +273,7 @@ pub struct CreateIntent<'info> {
         payer = user,
         token::mint = target_token,
         token::authority = intent,
-        seeds = [b"vault", intent.key().as_ref()],
+        seeds = [b"vault", intent.key().as_ref(), &intent_id.to_le_bytes()],
         bump
     )]
     pub vault_token_account: Account<'info, TokenAccount>,
@@ -268,32 +284,34 @@ pub struct CreateIntent<'info> {
 
 #[derive(Accounts)]
 pub struct ExecuteIntent<'info> {
-    #[account(mut)]
+    #[account(mut, seeds = [b"intent", intent.user.as_ref(), &intent.intent_id.to_le_bytes()], bump, close = user)]
     pub intent: Account<'info, Intent>,
     #[account(mut)]
     pub state: Account<'info, State>,
     /// CHECK: verified via pyth SDK
     pub pyth_price_feed: AccountInfo<'info>,
-    #[account(mut)]
+    #[account(mut, close = user, seeds = [b"intent_token", intent.user.as_ref(), &intent.intent_id.to_le_bytes()], bump)]
     pub intent_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
     pub user_token_account: Account<'info, TokenAccount>,
-    #[account(mut)]
+    #[account(mut, close = user, seeds = [b"vault", intent.key().as_ref(), &intent.intent_id.to_le_bytes()], bump)]
     pub vault_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
+    #[account(mut)]
+    pub user: Signer<'info>,
 }
 
 #[derive(Accounts)]
 pub struct CancelIntent<'info> {
-    #[account(mut)]
+    #[account(mut, seeds = [b"intent", intent.user.as_ref(), &intent.intent_id.to_le_bytes()], bump, close = user)]
     pub intent: Account<'info, Intent>,
     #[account(mut)]
     pub user: Signer<'info>,
-    #[account(mut)]
+    #[account(mut, close = user, seeds = [b"intent_token", intent.user.as_ref(), &intent.intent_id.to_le_bytes()], bump)]
     pub intent_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
     pub user_token_account: Account<'info, TokenAccount>,
-    #[account(mut)]
+    #[account(mut, close = user, seeds = [b"vault", intent.key().as_ref(), &intent.intent_id.to_le_bytes()], bump)]
     pub vault_token_account: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
 }
@@ -309,6 +327,7 @@ impl State {
 
 #[account]
 pub struct Intent {
+    pub intent_id: u64,
     pub user: Pubkey,
     pub source_token: Pubkey,
     pub target_token: Pubkey,
@@ -325,7 +344,7 @@ pub struct Intent {
     pub loop_count: u64,
 }
 impl Intent {
-    pub const LEN: usize = 32*3 + 8*4 + 1*2 + 8*2 + 4 + 4 + 1 + 8;
+    pub const LEN: usize = 8 + 32*3 + 8*4 + 1*2 + 8*2 + 4 + 4 + 1 + 8;
 }
 
 // Split the IntentCreated event into smaller events to reduce stack usage
@@ -394,4 +413,6 @@ pub enum CrossGuardError {
     InvalidTargetAction,
     #[msg("Not in loop mode")]
     NotInLoopMode,
+    #[msg("Loop count too high")]
+    LoopCountTooHigh,
 }

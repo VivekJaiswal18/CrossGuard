@@ -1,22 +1,40 @@
 import { Program, AnchorProvider, web3, BN } from '@project-serum/anchor';
 import { IDL } from '../idl/crossguard';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useWallet, WalletContextState } from '@solana/wallet-adapter-react';
 import { useConnection } from '@solana/wallet-adapter-react';
 import { useMemo } from 'react';
 
 // Program ID from Anchor.toml
-const PROGRAM_ID = new web3.PublicKey('6FWQ5mNaGKLx4jfGa7TEU5RUsmmKCS3sF6BafXTxdvSN');
+const PROGRAM_ID = new web3.PublicKey('BWBZAQvr5i6JPs23sDUzqEVYNC3BqujUEkgnNkpB5Rgn');
+
+function toAnchorWallet(wallet: WalletContextState | null): AnchorProvider['wallet'] | null {
+  if (
+    wallet &&
+    wallet.publicKey &&
+    wallet.signTransaction &&
+    wallet.signAllTransactions
+  ) {
+    return {
+      publicKey: wallet.publicKey,
+      signTransaction: wallet.signTransaction,
+      signAllTransactions: wallet.signAllTransactions,
+    };
+  }
+  return null;
+}
 
 export const useProgram = () => {
   const { connection } = useConnection();
   const wallet = useWallet();
 
+  const anchorWallet = useMemo(() => toAnchorWallet(wallet), [wallet]);
+
   const provider = useMemo(() => {
-    if (!wallet) return null;
-    return new AnchorProvider(connection, wallet, {
+    if (!anchorWallet) return null;
+    return new AnchorProvider(connection, anchorWallet, {
       commitment: 'confirmed',
     });
-  }, [connection, wallet]);
+  }, [connection, anchorWallet]);
 
   const program = useMemo(() => {
     if (!provider) return null;

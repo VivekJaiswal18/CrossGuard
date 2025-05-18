@@ -1,0 +1,520 @@
+{
+  "version": "0.1.0",
+  "name": "crossguard",
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "owner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "pythPriceFeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createIntent",
+      "accounts": [
+        {
+          "name": "intent",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "sourceToken",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "targetToken",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "userTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "intentTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "intentId",
+          "type": "u64"
+        },
+        {
+          "name": "sourceAmount",
+          "type": "u64"
+        },
+        {
+          "name": "targetAmount",
+          "type": "u64"
+        },
+        {
+          "name": "triggerPrice",
+          "type": "i64"
+        },
+        {
+          "name": "isTakeProfit",
+          "type": "bool"
+        },
+        {
+          "name": "targetChain",
+          "type": {
+            "array": [
+              "u8",
+              4
+            ]
+          }
+        },
+        {
+          "name": "targetAction",
+          "type": {
+            "array": [
+              "u8",
+              4
+            ]
+          }
+        },
+        {
+          "name": "loopMode",
+          "type": "bool"
+        },
+        {
+          "name": "loopCount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "executeIntent",
+      "accounts": [
+        {
+          "name": "intent",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "pythPriceFeed",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "intentTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "cancelIntent",
+      "accounts": [
+        {
+          "name": "intent",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "intentTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "State",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "publicKey"
+          },
+          {
+            "name": "pythPriceFeed",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Intent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "intentId",
+            "type": "u64"
+          },
+          {
+            "name": "user",
+            "type": "publicKey"
+          },
+          {
+            "name": "sourceToken",
+            "type": "publicKey"
+          },
+          {
+            "name": "targetToken",
+            "type": "publicKey"
+          },
+          {
+            "name": "sourceAmount",
+            "type": "u64"
+          },
+          {
+            "name": "targetAmount",
+            "type": "u64"
+          },
+          {
+            "name": "triggerPrice",
+            "type": "i64"
+          },
+          {
+            "name": "isTakeProfit",
+            "type": "bool"
+          },
+          {
+            "name": "isActive",
+            "type": "bool"
+          },
+          {
+            "name": "createdAt",
+            "type": "i64"
+          },
+          {
+            "name": "executedAt",
+            "type": "i64"
+          },
+          {
+            "name": "targetChain",
+            "type": {
+              "array": [
+                "u8",
+                4
+              ]
+            }
+          },
+          {
+            "name": "targetAction",
+            "type": {
+              "array": [
+                "u8",
+                4
+              ]
+            }
+          },
+          {
+            "name": "loopMode",
+            "type": "bool"
+          },
+          {
+            "name": "loopCount",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "IntentCreatedBasicInfo",
+      "fields": [
+        {
+          "name": "intentId",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "user",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "sourceAmount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "triggerPrice",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "isTakeProfit",
+          "type": "bool",
+          "index": false
+        },
+        {
+          "name": "loopMode",
+          "type": "bool",
+          "index": false
+        },
+        {
+          "name": "loopCount",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "IntentCreatedTokenInfo",
+      "fields": [
+        {
+          "name": "intentId",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "sourceToken",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "targetToken",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "IntentCreatedActionInfo",
+      "fields": [
+        {
+          "name": "intentId",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "targetChain",
+          "type": {
+            "array": [
+              "u8",
+              4
+            ]
+          },
+          "index": false
+        },
+        {
+          "name": "targetAction",
+          "type": {
+            "array": [
+              "u8",
+              4
+            ]
+          },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "IntentLooped",
+      "fields": [
+        {
+          "name": "intentId",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "user",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "loopCount",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "IntentExecuted",
+      "fields": [
+        {
+          "name": "intentId",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "user",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "executedAt",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "IntentCancelled",
+      "fields": [
+        {
+          "name": "intentId",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "user",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "IntentNotActive",
+      "msg": "Intent is not active"
+    },
+    {
+      "code": 6001,
+      "name": "PriceConditionNotMet",
+      "msg": "Price condition not met"
+    },
+    {
+      "code": 6002,
+      "name": "Unauthorized",
+      "msg": "Unauthorized"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidAmount",
+      "msg": "Invalid amount"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidPrice",
+      "msg": "Invalid price"
+    },
+    {
+      "code": 6005,
+      "name": "StalePriceFeed",
+      "msg": "Stale price feed"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidTargetChain",
+      "msg": "Invalid target chain"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidTargetAction",
+      "msg": "Invalid target action"
+    },
+    {
+      "code": 6008,
+      "name": "NotInLoopMode",
+      "msg": "Not in loop mode"
+    },
+    {
+      "code": 6009,
+      "name": "LoopCountTooHigh",
+      "msg": "Loop count too high"
+    }
+  ],
+  "metadata": {
+    "address": "BWBZAQvr5i6JPs23sDUzqEVYNC3BqujUEkgnNkpB5Rgn"
+  }
+}
