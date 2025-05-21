@@ -6,7 +6,7 @@ Users define their SL/TP intents (e.g., “Sell my $SOL if price drops below $12
 
 This creates a non-custodial, decentralized safety net for crypto traders and DeFi users across ecosystems — ideal for volatile markets or passive portfolio management.
 
-Not only this but CrossGuard offers a first of its kind "Loop Mode" option to the users, which when enabled, keeps the loop for maintaining the intent till the user withdraws the tokens for maintaing the value of the asset on chain even if it has to be bridged to other chains.
+Not only this but CrossGuard offers a first of its kind `Loop Mode` option to the users, which when enabled, keeps the loop for maintaining the intent till the user withdraws the tokens for maintaing the value of the asset on chain even if it has to be bridged to other chains.
 
 ## Key Features
 
