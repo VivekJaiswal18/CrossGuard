@@ -2,7 +2,7 @@
 
 Crossguard is an intent-based cross-chain Stop Loss (SL) / Take Profit (TP) protocol that enables users to secure profits or prevent losses on any token they hold — across chains — without actively monitoring the market.
 
-Users define their SL/TP intents (e.g., “Sell my $SOL if price drops below $120”) through an intuitive UI. These intents are monitored off-chain, and once conditions are met, Crossguard executes a cross-chain swap or transfer using Mayan Swift, with transaction settlement via Wormhole Settlement Layer.
+Users define their SL/TP intents (e.g., “Sell my $SOL if price drops below $120”) through an intuitive UI. These intents are stored on-chain and monitored by the smart contract, and once conditions are met the smart contract triggers an event to the backend which executes a cross-chain swap or transfer using Mayan Swift, with transaction settlement via Wormhole Settlement Layer.
 
 This creates a non-custodial, decentralized safety net for crypto traders and DeFi users across ecosystems — ideal for volatile markets or passive portfolio management.
 
