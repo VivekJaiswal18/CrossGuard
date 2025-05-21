@@ -84,7 +84,7 @@ export default function HistoryPage() {
         <header className="flex items-center justify-between py-8">
           <div className="flex items-center">
             <Link href="/" className="text-2xl font-medium tracking-tight">
-              ChainIntent
+            CrossGurard
             </Link>
           </div>
           <nav className="hidden md:flex items-center space-x-8">
@@ -170,7 +170,7 @@ export default function HistoryPage() {
 
         <footer className="py-8 border-t border-zinc-900">
           <div className="flex justify-between items-center">
-            <p className="text-sm text-zinc-500">© {new Date().getFullYear()} ChainIntent</p>
+            <p className="text-sm text-zinc-500">© {new Date().getFullYear()} CrossGurard</p>
             <div className="flex gap-6">
               <Link href="#" className="text-sm text-zinc-500 hover:text-white transition-colors">
                 privacy policy

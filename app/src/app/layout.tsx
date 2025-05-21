@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" })
 
 export const metadata = {
-  title: "ChainIntent - Cross-Chain Stop Loss & Take Profit Platform",
+  title: "CrossGurard - Cross-Chain Stop Loss & Take Profit Platform",
   description: "Set stop loss and take profit across any blockchain with our Wormhole-powered intent platform.",
 }
 

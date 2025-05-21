@@ -1,6 +1,9 @@
 {
   "version": "0.1.0",
   "name": "crossguard",
+  "metadata": {
+    "address": "BWBZAQvr5i6JPs23sDUzqEVYNC3BqujUEkgnNkpB5Rgn"
+  },
   "instructions": [
     {
       "name": "initialize",
@@ -513,8 +516,5 @@
       "name": "LoopCountTooHigh",
       "msg": "Loop count too high"
     }
-  ],
-  "metadata": {
-    "address": "BWBZAQvr5i6JPs23sDUzqEVYNC3BqujUEkgnNkpB5Rgn"
-  }
+  ]
 }

@@ -130,7 +130,7 @@ export default function Home() {
       <div className="container mx-auto px-6 lg:px-8">
         <header className="flex items-center justify-between py-8">
           <div className="flex items-center">
-            <h1 className="text-2xl font-medium tracking-tight">ChainIntent</h1>
+            <h1 className="text-2xl font-medium tracking-tight">CrossGurard</h1>
           </div>
           <nav className="hidden md:flex items-center space-x-8">
             <Link href="/" className="text-sm text-zinc-400 hover:text-white transition-colors">
@@ -169,7 +169,7 @@ export default function Home() {
                   intents
                 </h1>
                 <p className="text-xl text-zinc-400 max-w-md">
-                  ChainIntent is a members-only platform that enables the discerning trader to execute cross-chain
+                CrossGurard is a members-only platform that enables the discerning trader to execute cross-chain
                   intents with precision
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
@@ -280,7 +280,7 @@ export default function Home() {
               <div className="grid md:grid-cols-2 gap-16">
                 <div>
                   <p className="text-zinc-400">
-                    ChainIntent encrypts all data and transactions to ensure a completely secure experience for our
+                  CrossGurard encrypts all data and transactions to ensure a completely secure experience for our
                     members.
                   </p>
                 </div>
@@ -383,7 +383,7 @@ export default function Home() {
               </div>
             </div>
             <div className="mt-16 pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <p className="text-sm text-zinc-500">© {new Date().getFullYear()} ChainIntent Technologies Pvt Ltd.</p>
+              <p className="text-sm text-zinc-500">© {new Date().getFullYear()} CrossGurard Technologies Pvt Ltd.</p>
               <div className="flex gap-8">
                 <Link href="#" className="text-sm text-zinc-500 hover:text-white transition-colors">
                   privacy policy

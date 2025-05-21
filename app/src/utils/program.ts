@@ -4,8 +4,8 @@ import { useWallet, WalletContextState } from '@solana/wallet-adapter-react';
 import { useConnection } from '@solana/wallet-adapter-react';
 import { useMemo } from 'react';
 
-// Program ID from Anchor.toml
-const PROGRAM_ID = new web3.PublicKey('BWBZAQvr5i6JPs23sDUzqEVYNC3BqujUEkgnNkpB5Rgn');
+// Program ID from deployment
+const PROGRAM_ID = new web3.PublicKey("BWBZAQvr5i6JPs23sDUzqEVYNC3BqujUEkgnNkpB5Rgn");
 
 function toAnchorWallet(wallet: WalletContextState | null): AnchorProvider['wallet'] | null {
   if (
@@ -33,6 +33,7 @@ export const useProgram = () => {
     if (!anchorWallet) return null;
     return new AnchorProvider(connection, anchorWallet, {
       commitment: 'confirmed',
+      preflightCommitment: 'confirmed',
     });
   }, [connection, anchorWallet]);
 

@@ -23,7 +23,7 @@ const CHAINS = [
   { name: "BNB Chain", id: [8, 0, 0, 0] },
 ]
 
-const PROGRAM_ID = process.env.NEXT_PUBLIC_PROGRAM_ID || "BWBZAQvr5i6JPs23sDUzqEVYNC3BqujUEkgnNkpB5Rgn"
+const PROGRAM_ID = new PublicKey("BWBZAQvr5i6JPs23sDUzqEVYNC3BqujUEkgnNkpB5Rgn")
 const RPC_URL = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.devnet.solana.com"
 
 const TOP_TOKENS: Record<string, { symbol: string; name: string; mint: string }[]> = {
@@ -111,8 +111,22 @@ export default function IntentsPage() {
     setMessage("")
     try {
       const connection = new Connection(RPC_URL)
-      const provider = new AnchorProvider(connection, { publicKey, signTransaction } as any, {})
-      const program = new Program(idl as any, PROGRAM_ID, provider)
+      const provider = new AnchorProvider(
+        connection,
+        { publicKey, signTransaction } as any,
+        {
+          commitment: 'confirmed',
+          preflightCommitment: 'confirmed',
+        }
+      )
+      
+      // Initialize program with explicit IDL and program ID
+      const program = new Program(
+        idl as any,
+        new PublicKey("BWBZAQvr5i6JPs23sDUzqEVYNC3BqujUEkgnNkpB5Rgn"),
+        provider
+      );
+
       const sourceAmount = new BN(1_000_000) // 1 token with 6 decimals
       const targetAmount = new BN(1_000_000) // 1 token with 6 decimals
       const triggerPrice = Math.floor(Number(targetPrice) * 1e6) // price with 6 decimals
@@ -130,15 +144,15 @@ export default function IntentsPage() {
       // Derive PDAs
       const [intentPda] = await PublicKey.findProgramAddress(
         [Buffer.from('intent'), publicKey.toBuffer(), new BN(intentId).toArrayLike(Buffer, 'le', 8)],
-        new PublicKey(PROGRAM_ID)
+        PROGRAM_ID
       );
       const [intentTokenPda] = await PublicKey.findProgramAddress(
         [Buffer.from('intent_token'), publicKey.toBuffer(), new BN(intentId).toArrayLike(Buffer, 'le', 8)],
-        new PublicKey(PROGRAM_ID)
+        PROGRAM_ID
       );
       const [vaultTokenPda] = await PublicKey.findProgramAddress(
         [Buffer.from('vault'), intentPda.toBuffer(), new BN(intentId).toArrayLike(Buffer, 'le', 8)],
-        new PublicKey(PROGRAM_ID)
+        PROGRAM_ID
       );
 
       // Find user's associated token account for the selected token
@@ -198,7 +212,7 @@ export default function IntentsPage() {
         <header className="flex items-center justify-between py-8">
           <div className="flex items-center">
             <Link href="/" className="text-2xl font-medium tracking-tight">
-              ChainIntent
+            CrossGurard
             </Link>
           </div>
           <nav className="hidden md:flex items-center space-x-8">
@@ -514,7 +528,7 @@ export default function IntentsPage() {
 
         <footer className="py-8 border-t border-zinc-900">
           <div className="flex justify-between items-center">
-            <p className="text-sm text-zinc-500">© {new Date().getFullYear()} ChainIntent</p>
+            <p className="text-sm text-zinc-500">© {new Date().getFullYear()} CrossGurard</p>
             <div className="flex gap-6">
               <Link href="#" className="text-sm text-zinc-500 hover:text-white transition-colors">
                 privacy policy

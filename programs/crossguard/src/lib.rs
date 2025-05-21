@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Token, TokenAccount, Transfer, Mint};
 use pyth_sdk_solana::load_price_feed_from_account_info;
 
-declare_id!("6FWQ5mNaGKLx4jfGa7TEU5RUsmmKCS3sF6BafXTxdvSN");
+declare_id!("BWBZAQvr5i6JPs23sDUzqEVYNC3BqujUEkgnNkpB5Rgn");
 
 #[program]
 pub mod crossguard {
@@ -231,7 +231,13 @@ pub mod crossguard {
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init, payer = owner, space = 8 + State::LEN)]
+    #[account(
+        init,
+        payer = owner,
+        space = 8 + State::LEN,
+        seeds = [b"state"],
+        bump
+    )]
     pub state: Account<'info, State>,
     #[account(mut)]
     pub owner: Signer<'info>,
@@ -251,13 +257,21 @@ pub struct CreateIntent<'info> {
         bump
     )]
     pub intent: Account<'info, Intent>,
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [b"state"],
+        bump
+    )]
     pub state: Account<'info, State>,
     #[account(mut)]
     pub user: Signer<'info>,
     pub source_token: Account<'info, Mint>,
     pub target_token: Account<'info, Mint>,
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = user_token_account.owner == user.key(),
+        constraint = user_token_account.mint == source_token.key()
+    )]
     pub user_token_account: Account<'info, TokenAccount>,
     #[account(
         init,
@@ -271,7 +285,7 @@ pub struct CreateIntent<'info> {
     #[account(
         init,
         payer = user,
-        token::mint = target_token,
+        token::mint = source_token,
         token::authority = intent,
         seeds = [b"vault", intent.key().as_ref(), &intent_id.to_le_bytes()],
         bump

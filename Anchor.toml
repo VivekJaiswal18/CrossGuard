@@ -7,12 +7,14 @@ skip-lint = false
 [programs.localnet]
 crossguard = "BWBZAQvr5i6JPs23sDUzqEVYNC3BqujUEkgnNkpB5Rgn"
 
+[programs.devnet]
+crossguard = "BWBZAQvr5i6JPs23sDUzqEVYNC3BqujUEkgnNkpB5Rgn"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "https://api.devnet.solana.com "
+cluster = "https://api.devnet.solana.com"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
